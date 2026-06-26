@@ -1,5 +1,130 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><title>Codex GitHub Pages Smoke Test</title></head>
-<body><h1>GitHub Pages success smoke test</h1></body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>薄肌 + 腹肌每日执行看板</title>
+  <style>
+    :root {
+      --bg: #f6f3ed;
+      --panel: #fffdf8;
+      --ink: #24221f;
+      --muted: #706a60;
+      --line: #ddd4c6;
+      --green: #377965;
+      --green-soft: #dcebe4;
+      --blue: #2f5f93;
+      --yellow: #e4ad3f;
+      --shadow: 0 18px 45px rgba(49, 42, 32, 0.12);
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", Arial, sans-serif;
+      background: linear-gradient(135deg, rgba(47, 95, 147, 0.08), transparent 36%), linear-gradient(315deg, rgba(228, 173, 63, 0.12), transparent 34%), var(--bg);
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .shell { width: min(1180px, calc(100% - 28px)); margin: 0 auto; padding: 22px 0 42px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    h1 { margin: 0; font-size: clamp(26px, 5vw, 46px); line-height: 1.05; letter-spacing: 0; }
+    .subtitle { margin: 5px 0 0; color: var(--muted); font-size: 15px; }
+    .date-chip { display: grid; place-items: center; min-width: 112px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255, 253, 248, 0.82); box-shadow: var(--shadow); }
+    .date-chip strong { font-size: 22px; }
+    .date-chip span { color: var(--muted); font-size: 12px; }
+    .hero-grid, .content-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 16px; align-items: start; }
+    .content-grid { margin-top: 16px; grid-template-columns: 0.9fr 1.1fr; }
+    .panel { border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255, 253, 248, 0.92); box-shadow: var(--shadow); }
+    .panel-body { padding: 18px; }
+    .today-card { min-height: 410px; display: grid; grid-template-columns: 0.95fr 1.05fr; overflow: hidden; }
+    .today-main { padding: 24px; background: linear-gradient(160deg, rgba(55, 121, 101, 0.16), transparent 48%), linear-gradient(25deg, rgba(47, 95, 147, 0.12), transparent 42%), var(--panel); border-right: 1px solid var(--line); }
+    .eyebrow { color: var(--green); font-size: 13px; font-weight: 800; }
+    .today-title { margin: 8px 0 12px; font-size: clamp(30px, 5vw, 54px); line-height: 1.04; letter-spacing: 0; }
+    .focus { color: var(--muted); font-size: 16px; line-height: 1.7; }
+    .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 22px; }
+    .stat { padding: 12px; border: 1px solid rgba(55, 121, 101, 0.22); border-radius: var(--radius); background: rgba(255, 255, 255, 0.56); }
+    .stat b { display: block; font-size: 19px; }
+    .stat span { color: var(--muted); font-size: 12px; }
+    .exercise-list { padding: 18px; }
+    .section-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; font-size: 18px; }
+    .section-title small { color: var(--muted); font-size: 12px; font-weight: 500; }
+    .exercise { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 12px 0; border-top: 1px solid var(--line); }
+    .exercise:first-of-type { border-top: 0; }
+    .num { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: var(--green-soft); color: var(--green); font-weight: 800; }
+    .exercise h3 { margin: 0 0 4px; font-size: 16px; }
+    .exercise p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+    .schedule { display: grid; gap: 10px; }
+    .slot { display: grid; grid-template-columns: 82px 1fr; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255, 255, 255, 0.54); }
+    .slot time { color: var(--blue); font-weight: 900; }
+    .slot b { display: block; margin-bottom: 3px; }
+    .slot span { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .day-tabs { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 14px; }
+    .day-tab { min-height: 58px; border: 1px solid var(--line); border-radius: var(--radius); color: var(--muted); background: var(--panel); font-weight: 800; }
+    .day-tab.active { border-color: var(--green); color: #fff; background: var(--green); }
+    .day-tab small { display: block; margin-top: 3px; font-weight: 500; font-size: 11px; }
+    .nutrition-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .mini { padding: 14px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255, 255, 255, 0.56); }
+    .mini h3 { margin: 0 0 8px; font-size: 16px; }
+    .mini p, .mini li { color: var(--muted); line-height: 1.58; font-size: 14px; }
+    .mini p { margin: 0; }
+    .protein-meter { margin-top: 14px; padding: 14px; border-radius: var(--radius); background: #f1eee7; }
+    .meter-top { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 14px; }
+    .meter-top strong { color: var(--ink); font-size: 22px; }
+    .track { height: 12px; margin: 10px 0 12px; overflow: hidden; border-radius: 999px; background: #ded7cd; }
+    .fill { width: 0%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--yellow), var(--green)); transition: width 0.2s ease; }
+    .food-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .food-buttons button, .utility-button { min-height: 40px; border: 1px solid var(--line); border-radius: var(--radius); color: var(--ink); background: var(--panel); font-weight: 800; }
+    .food-buttons button:hover, .utility-button:hover { border-color: var(--green); }
+    .checklist { display: grid; gap: 10px; }
+    .check { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; padding: 11px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255, 255, 255, 0.56); }
+    .check input { width: 20px; height: 20px; accent-color: var(--green); }
+    .check span { color: var(--muted); font-size: 13px; }
+    .field-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    label.field { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .field input { width: 100%; height: 42px; border: 1px solid var(--line); border-radius: var(--radius); padding: 0 10px; color: var(--ink); background: #fff; }
+    .rules { display: grid; gap: 10px; }
+    .rule { padding: 12px; border-left: 4px solid var(--green); border-radius: var(--radius); background: rgba(220, 235, 228, 0.62); }
+    .rule b { display: block; margin-bottom: 4px; }
+    .rule span { color: var(--muted); font-size: 14px; line-height: 1.55; }
+    details { border-top: 1px solid var(--line); padding: 14px 18px; }
+    details:first-of-type { border-top: 0; }
+    summary { cursor: pointer; font-weight: 900; color: var(--ink); }
+    details p, details li { color: var(--muted); line-height: 1.65; }
+    .memory { display: grid; gap: 10px; padding: 18px; }
+    .quote { padding: 13px 14px; border-radius: var(--radius); color: #fff; background: var(--blue); font-weight: 800; line-height: 1.5; }
+    .footer-note { margin: 16px 0 0; color: var(--muted); font-size: 12px; text-align: center; }
+    @media (max-width: 980px) { .hero-grid, .content-grid, .today-card, .nutrition-grid { grid-template-columns: 1fr; } .today-main { border-right: 0; border-bottom: 1px solid var(--line); } }
+    @media (max-width: 680px) { .shell { width: min(100% - 20px, 1180px); padding-top: 14px; } .topbar { align-items: stretch; flex-direction: column; } .date-chip { display: flex; justify-content: space-between; } .stat-row, .day-tabs, .food-buttons, .field-grid { grid-template-columns: 1fr; } .slot { grid-template-columns: 70px 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar"><div><h1>薄肌 + 腹肌每日执行看板</h1><p class="subtitle">16:30 香蕉和水，17:00 训练，18:00-19:00 晚饭恢复。</p></div><div class="date-chip" aria-live="polite"><strong id="todayWeek">周-</strong><span id="todayDate">--</span></div></header>
+    <section class="hero-grid"><article class="panel today-card"><div class="today-main"><div class="eyebrow" id="todayKind">今日安排</div><h2 class="today-title" id="todayTitle">加载中</h2><p class="focus" id="todayFocus"></p><div class="stat-row"><div class="stat"><b>35-45</b><span>分钟训练</span></div><div class="stat"><b>65-80g</b><span>每日蛋白</span></div><div class="stat"><b>66-68kg</b><span>体重目标</span></div></div></div><div class="exercise-list"><h2 class="section-title">今日动作 <small id="todayHint">每组保留 1-2 次力竭</small></h2><div id="exerciseList"></div></div></article><aside class="panel"><div class="panel-body"><h2 class="section-title">今天节奏 <small>按时间走就行</small></h2><div class="schedule"><div class="slot"><time>上午</time><div><b>正常早餐</b><span>不用训练，可以散步、简单拉伸或收拾屋子。</span></div></div><div class="slot"><time>中午</time><div><b>午饭吃完整</b><span>主食 + 肉蛋奶豆 + 菜。</span></div></div><div class="slot"><time>16:00</time><div><b>准备训练</b><span>换衣服、备水、把动作顺一遍。</span></div></div><div class="slot"><time>16:30</time><div><b>香蕉 1 根 + 水</b><span>很饿再加半勺蛋白粉、牛奶或鸡蛋。</span></div></div><div class="slot"><time>17:00</time><div><b>正式训练</b><span>先热身 3-5 分钟，再做当天 3-4 个动作。</span></div></div><div class="slot"><time>18:00</time><div><b>晚饭恢复</b><span>主食 + 蛋白质 + 蔬菜；蛋白不够再补粉。</span></div></div></div></div></aside></section>
+    <section class="content-grid"><article class="panel"><div class="panel-body"><h2 class="section-title">一周训练 <small>点日期可预览</small></h2><div class="day-tabs" id="dayTabs"></div><div class="nutrition-grid"><div class="mini"><h3>固定热身</h3><p>猫牛式 x 10、下巴回收 x 10、靠墙天使 x 10。练腿或臀时加臀桥 x 15。</p></div><div class="mini"><h3>强度原则</h3><p>每组做到还剩 1-2 次力竭。次数慢慢涨，就是有效进步。</p></div></div></div></article><article class="panel"><div class="panel-body"><h2 class="section-title">能量和蛋白 <small>按体重 1.0-1.2 倍估算</small></h2><div class="nutrition-grid"><div class="mini"><h3>练前</h3><p>香蕉 1 根 + 水。别吃油炸、大量肉、火锅、奶茶甜饮或很撑的饭。</p></div><div class="mini"><h3>练后晚饭</h3><p>主食 + 蛋白质 + 蔬菜。晚饭肉蛋奶豆少，就补半勺到一勺蛋白粉。</p></div></div><div class="protein-meter"><div class="meter-top"><span>今日蛋白估算 <strong id="proteinValue">0g</strong></span><span>目标 65-80g</span></div><div class="track"><div class="fill" id="proteinFill"></div></div><div class="food-buttons" id="foodButtons"></div><button class="utility-button" id="resetProtein" type="button" style="width:100%; margin-top:8px;">清空今日蛋白</button></div></div></article></section>
+    <section class="content-grid"><article class="panel"><div class="panel-body"><h2 class="section-title">今日打卡 <small>自动保存</small></h2><div class="checklist" id="checklist"></div></div></article><article class="panel"><div class="panel-body"><h2 class="section-title">身体观察 <small>看趋势，不看一天波动</small></h2><div class="field-grid"><label class="field">体重 kg<input id="weightInput" inputmode="decimal" placeholder="65.8" /></label><label class="field">腰围 cm<input id="waistInput" inputmode="decimal" placeholder="71" /></label><label class="field">训练备注<input id="noteInput" placeholder="俯卧撑 10/9/8/7" /></label></div><button class="utility-button" id="saveMetrics" type="button" style="width:100%; margin-top:10px;">保存今日记录</button><p class="subtitle" id="latestMetrics" style="margin-top:10px;"></p></div></article></section>
+    <section class="content-grid"><article class="panel"><div class="panel-body"><h2 class="section-title">饮食调整规则 <small>按结果微调</small></h2><div class="rules"><div class="rule"><b>体重不涨，力量也不涨</b><span>每天加一个：半碗米饭、一个馒头、一个香蕉、一杯牛奶或一个紫薯。</span></div><div class="rule"><b>体重涨，腰围不怎么涨</b><span>很好，继续。比如 65.8kg 到 66.5kg，腰围还是 71-72cm。</span></div><div class="rule"><b>腰围涨太快</b><span>先减少夜宵、奶茶、甜饮、油炸、零食和大量外卖。</span></div></div></div></article><article class="panel"><div class="memory"><h2 class="section-title">最终记忆版 <small>每天扫一眼</small></h2><div class="quote">我现在不减肥，而是轻微增肌。</div><div class="quote">一周 4 练，每次 3-4 个动作。</div><div class="quote">推日练胸肩腹，拉日练背后肩核心。</div><div class="quote">蛋白目标 65-80g，按体重 1.0-1.2 倍来。</div><div class="quote">体重慢慢到 66-68kg，腰围控制在 71-73cm。</div></div></article></section>
+    <section class="panel" style="margin-top:16px;"><details open><summary>完整训练动作</summary><p><b>周一：推 + 腹。</b>俯卧撑 / 上斜俯卧撑 4 组 x 8-15 次；侧平举 4 组 x 12-20 次；卷腹 3 组 x 15-20 次；反向卷腹 3 组 x 10-15 次。</p><p><b>周二：拉 + 体态。</b>引体辅助 / 下拉 / 门框划船 4 组 x 6-12 次；俯身划船 4 组 x 8-15 次；反向飞鸟 3 组 x 12-20 次；平板支撑 3 组 x 30-60 秒。</p><p><b>周三：休息 / 散步 / 收拾屋子。</b>散步 20-40 分钟，拉伸 5-10 分钟，目标是恢复。</p><p><b>周四：推 + 腹。</b>俯卧撑 / 上斜俯卧撑 4 组 x 8-15 次；肩推 / 书包肩推 3 组 x 8-12 次；侧平举 3 组 x 12-20 次；Hollow hold / 平板支撑 3 组 x 20-40 秒。</p><p><b>周五：拉 + 臀腿 + 核心。</b>划船 4 组 x 8-15 次；引体辅助 / 下拉 4 组 x 6-12 次；臀桥 / 深蹲二选一 3 组 x 12-20 次；死虫 / 平板支撑 3 组。</p><p><b>周六 / 周日：休息。</b>散步、拉伸、整理房间、肩颈放松。不要疯狂跑步。</p></details><details><summary>观察身体变化</summary><ul><li>体重每周测 3 次：早上起床、上厕所后、空腹测，看一周平均。</li><li>腰围每周测 1-2 次：早上空腹测，同一个位置，目标 71-73cm。</li><li>照片每周拍 1 次：同房间、同灯光、同距离，正面、侧面、背面各一张。</li><li>训练记录看 4-8 周：腰围差不多，力量涨了，照片变好看了，就是方向对。</li></ul></details><details><summary>蛋白质速查</summary><ul><li>鸡蛋 2 个：约 12g。</li><li>牛奶 500ml：约 15g。</li><li>豆浆 400ml：约 7g。</li><li>豆腐一份：约 10-15g。</li><li>蛋白粉 1 勺：30g 粉 x 82.4% = 约 24.7g 蛋白质。</li><li>肉 / 鱼 / 鸡 / 牛 200g：约 40g。</li></ul></details></section>
+    <p class="footer-note">数据只保存在当前浏览器本地。先稳定执行 8-12 周。</p>
+  </main>
+  <script>
+    const plan=[{day:"周日",short:"休",title:"休息",kind:"恢复日",focus:"散步、拉伸、整理房间或肩颈放松。今天不需要大量有氧。",exercises:[["散步","20-40 分钟，舒服的速度。"],["拉伸","5-10 分钟，重点放松肩颈和髋。"],["早点收尾","晚上别靠零食夜宵补情绪。"]]},{day:"周一",short:"推",title:"推 + 腹",kind:"训练日",focus:"主要练胸、肩、三头、腹肌。目标是上身轮廓和腹部紧致。",exercises:[["俯卧撑 / 上斜俯卧撑","4 组 x 8-15 次。标准做不了太多就做上斜。"],["侧平举","4 组 x 12-20 次。肩宽一点，腰会显得更细。"],["卷腹","3 组 x 15-20 次，控制发力。"],["反向卷腹","3 组 x 10-15 次，别靠惯性甩。"]]},{day:"周二",short:"拉",title:"拉 + 体态",kind:"训练日",focus:"主要练背、后肩、核心，改善圆肩含胸。",exercises:[["引体辅助 / 下拉 / 门框划船","4 组 x 6-12 次。"],["俯身划船","4 组 x 8-15 次，可用哑铃、书包或水桶。"],["反向飞鸟","3 组 x 12-20 次，对圆肩内扣很有用。"],["平板支撑","3 组 x 30-60 秒。"]]},{day:"周三",short:"恢",title:"休息 / 散步",kind:"恢复日",focus:"不练力量。恢复、活动、把状态留给后两天训练。",exercises:[["散步","20-40 分钟。"],["拉伸","5-10 分钟。"],["收拾房间","少刷短视频，别躺一天。"]]},{day:"周四",short:"推",title:"推 + 腹",kind:"训练日",focus:"主要练胸、肩、核心。和周一相似，但加入肩推。",exercises:[["俯卧撑 / 上斜俯卧撑","4 组 x 8-15 次。"],["肩推 / 书包肩推","3 组 x 8-12 次。"],["侧平举","3 组 x 12-20 次。"],["Hollow hold / 平板支撑","3 组 x 20-40 秒。"]]},{day:"周五",short:"拉",title:"拉 + 臀腿 + 核心",kind:"训练日",focus:"主要练背、臀腿、核心和骨盆稳定。膝盖不舒服时优先臀桥。",exercises:[["划船","4 组 x 8-15 次。"],["引体辅助 / 下拉","4 组 x 6-12 次。"],["臀桥 / 深蹲二选一","3 组 x 12-20 次。深蹲先慢、轻，不跳跃。"],["死虫 / 平板支撑","3 组，保持腰腹稳定。"]]},{day:"周六",short:"休",title:"休息",kind:"恢复日",focus:"可以选一天轻活动。你现在不是胖，不需要大量有氧。",exercises:[["散步","轻松走一走。"],["拉伸","肩颈、胸椎、髋部。"],["肩颈放松","久坐后做几分钟。"]]}];
+    const foods=[["鸡蛋 2 个",12],["牛奶 500ml",15],["蛋白粉 1 勺",24.7],["肉/鱼 200g",40],["豆腐一份",12],["豆浆 400ml",7]];
+    const checks=["上午正常早餐","中午吃到主食 + 蛋白 + 菜","16:30 香蕉 1 根 + 水","完成今日训练或恢复活动","18:00-19:00 晚饭公式达成","晚上没有大量零食夜宵"];
+    const $=id=>document.getElementById(id);const now=new Date();const dateKey=now.toISOString().slice(0,10);let activeDay=now.getDay();let protein=Number(localStorage.getItem("protein-"+dateKey)||0);
+    function renderHeader(){$("todayWeek").textContent=plan[now.getDay()].day;$("todayDate").textContent=now.toLocaleDateString("zh-CN",{year:"numeric",month:"2-digit",day:"2-digit"});}
+    function renderDayTabs(){$("dayTabs").innerHTML=plan.map((item,index)=>`<button class="day-tab ${index===activeDay?"active":""}" type="button" data-day="${index}">${item.day}<small>${item.short}</small></button>`).join("");document.querySelectorAll(".day-tab").forEach(button=>{button.addEventListener("click",()=>{activeDay=Number(button.dataset.day);renderDay();renderDayTabs();});});}
+    function renderDay(){const item=plan[activeDay];$("todayKind").textContent=item.kind;$("todayTitle").textContent=item.title;$("todayFocus").textContent=item.focus;$("todayHint").textContent=item.kind==="训练日"?"每组保留 1-2 次力竭":"恢复也是计划的一部分";$("exerciseList").innerHTML=item.exercises.map((exercise,index)=>`<div class="exercise"><div class="num">${index+1}</div><div><h3>${exercise[0]}</h3><p>${exercise[1]}</p></div></div>`).join("");}
+    function renderFoods(){$("foodButtons").innerHTML=foods.map(([label,grams])=>`<button type="button" data-grams="${grams}" title="增加 ${grams}g 蛋白">+ ${label}</button>`).join("");document.querySelectorAll("#foodButtons button").forEach(button=>{button.addEventListener("click",()=>{protein+=Number(button.dataset.grams);saveProtein();});});$("resetProtein").addEventListener("click",()=>{protein=0;saveProtein();});updateProtein();}
+    function saveProtein(){localStorage.setItem("protein-"+dateKey,String(protein));updateProtein();}
+    function updateProtein(){$("proteinValue").textContent=protein+"g";$("proteinFill").style.width=Math.min(100,Math.round((protein/80)*100))+"%";}
+    function renderChecklist(){const stored=JSON.parse(localStorage.getItem("checks-"+dateKey)||"{}");$("checklist").innerHTML=checks.map((label,index)=>`<label class="check"><input type="checkbox" data-check="${index}" ${stored[index]?"checked":""} /><div><b>${label}</b><br><span>${index<3?"饮食和时间节奏":"训练、恢复和晚上收口"}</span></div></label>`).join("");document.querySelectorAll("#checklist input").forEach(box=>{box.addEventListener("change",()=>{stored[box.dataset.check]=box.checked;localStorage.setItem("checks-"+dateKey,JSON.stringify(stored));});});}
+    function renderMetrics(){const metrics=JSON.parse(localStorage.getItem("metrics-"+dateKey)||"{}");$("weightInput").value=metrics.weight||"";$("waistInput").value=metrics.waist||"";$("noteInput").value=metrics.note||"";updateMetricsText(metrics);$("saveMetrics").addEventListener("click",()=>{const next={weight:$("weightInput").value.trim(),waist:$("waistInput").value.trim(),note:$("noteInput").value.trim()};localStorage.setItem("metrics-"+dateKey,JSON.stringify(next));updateMetricsText(next);});}
+    function updateMetricsText(metrics){const parts=[];if(metrics.weight)parts.push("体重 "+metrics.weight+"kg");if(metrics.waist)parts.push("腰围 "+metrics.waist+"cm");if(metrics.note)parts.push("备注："+metrics.note);$("latestMetrics").textContent=parts.length?"今日已记录："+parts.join("，"):"还没有保存今天的身体记录。";}
+    renderHeader();renderDay();renderDayTabs();renderFoods();renderChecklist();renderMetrics();
+  </script>
+</body>
 </html>
